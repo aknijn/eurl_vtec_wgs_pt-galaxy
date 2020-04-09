@@ -1,0 +1,183 @@
+<tool id="eurlvtecwgspt" name="EURL VTEC WGS PT" version="3.0">
+    <description>performs various typing tools</description>
+    <requirements>
+        <requirement type="package" version="3.7">python</requirement>
+        <requirement type="package" version="5.26">perl</requirement>
+        <requirement type="package">perl-bioperl</requirement>
+        <requirement type="package" version="2.3.5">bowtie2</requirement>
+        <requirement type="package" version="1.3.1">samtools</requirement>
+        <requirement type="package" version="1.3.1">bcftools</requirement>
+        <requirement type="package">bwa</requirement>
+        <requirement type="package">mmseqs2</requirement>
+        <requirement type="package">spades</requirement>
+        <requirement type="package">fastqc</requirement>
+        <requirement type="package" version="0.2.4">mentalist</requirement>
+		<requirement type="package" version="3.6.7">ncbi-amrfinderplus</requirement>
+    </requirements>
+    <!-- basic error handling -->
+    <stdio>
+        <exit_code range="1:" level="fatal" description="Tool exception" />
+    </stdio>
+    <command>
+      python
+      $__tool_directory__/EURL_VTEC_WGS_PT.py --log $logfile --output $report_out --mlstsevenloci $mlstsevenloci
+      #if str( $library.type ) == "single":
+	      -1 ${library.input_1} --input1_ext ${library.input_1.ext} --input1_name '${library.input_1.name}' 
+          --html1 $html_file_1 --html1_id $__app__.security.encode_id($html_file_1.dataset.id) --html1_path ${html_file_1.files_path} 
+          --text1 $text_file_1
+      #elif str( $library.type ) == "paired":
+	      -1 ${library.input_1} --input1_ext ${library.input_1.ext} --input1_name '${library.input_1.name}' 
+          --html1 $html_file_1 --html1_id $__app__.security.encode_id($html_file_1.dataset.id) --html1_path ${html_file_1.files_path} 
+          --text1 $text_file_1
+          -2 ${library.input_2} --input2_ext ${library.input_2.ext} --input2_name '${library.input_2.name}' 
+          --html2 $html_file_2 --html2_id $__app__.security.encode_id($html_file_2.dataset.id) --html2_path ${html_file_2.files_path} 
+          --text2 $text_file_2
+      #elif str( $library.type ) == "pairedcollection":
+	      -1 ${library.input_pc.forward} --input1_ext ${library.input_pc.forward.ext} --input1_name '${library.input_pc.forward.name}' 
+          --html1 $html_file_1 --html1_id $__app__.security.encode_id($html_file_1.dataset.id) --html1_path ${html_file_1.files_path} 
+          --text1 $text_file_1
+          -2 ${library.input_pc.reverse} --input2_ext ${library.input_pc.reverse.ext} --input2_name '${library.input_pc.reverse.name}' 
+          --html2 $html_file_2 --html2_id $__app__.security.encode_id($html_file_2.dataset.id) --html2_path ${html_file_2.files_path} 
+          --text2 $text_file_2
+      #end if
+      #if $serotyping:
+          --serotyping
+          --antigen_O $antigen_O --antigen_H $antigen_H
+      #end if         
+      #if $virulotyping:
+          --virulotyping
+          --virulotyper $virulotyper --virulotyper_id $__app__.security.encode_id($virulotyper.dataset.id)
+      #end if
+      #if $shigatoxintyping:
+          --shigatoxintyping
+          --stx $stx
+      #end if
+      #if $amrtyping:
+          --amrtyping
+          --amr $amr
+		  --amr_id $__app__.security.encode_id($amr.dataset.id)
+      #end if
+    </command>
+
+    <inputs>
+        <!-- single/paired -->
+        <conditional name="library">
+            <param name="type" type="select" label="Is this a single-end or paired-end library">
+              <option value="single">Single-end</option>
+              <option value="paired">Paired-end</option>
+              <option value="pairedcollection">Paired-end collection</option>
+            </param>
+            <when value="single">
+                <param name="input_1" format="fastqsanger" type="data" label="FASTQ file" help="Must be of datatype &quot;fastqsanger&quot;" />
+            </when>
+            <when value="paired">
+                <param name="input_1" format="fastqsanger" type="data" label="FASTQ file #1" help="Must be of datatype &quot;fastqsanger&quot;" />
+                <param name="input_2" format="fastqsanger" type="data" label="FASTQ file #2" help="Must be of datatype &quot;fastqsanger&quot;" />
+            </when>
+            <when value="pairedcollection">
+              <param name="input_pc" type="data_collection" label="Paired-end FASTQ collection" help="Must be of datatype &quot;fastqsanger&quot;" optional="false" format="txt" collection_type="paired" />
+            </when>
+        </conditional>
+        <param name="serotyping" type="boolean" checked="true" label="Perform Serotyping" help="" />
+        <param name="virulotyping" type="boolean" checked="true" label="Perform Virulotyping" help="" />
+        <param name="shigatoxintyping" type="boolean" checked="true" label="Perform Shigatoxintyping" help="" />
+        <param name="amrtyping" type="boolean" checked="true" label="Perform AMR typing" help="" />
+    </inputs>
+
+    <!-- define outputs -->
+    <outputs>
+        <data format="html" name="html_file_1" label="${tool.name} on ${on_string}: Webpage" hidden="true" />
+        <data format="txt" name="text_file_1"  label="${tool.name} on ${on_string}: RawData" hidden="true" />
+        <data format="html" name="html_file_2" label="${tool.name} on ${on_string}: Webpage reverse" hidden="true">
+            <filter>library['type'] == 'paired' or library['type'] == 'pairedcollection'</filter>
+        </data>
+        <data format="txt" name="text_file_2"  label="${tool.name} on ${on_string}: RawData reverse" hidden="true">
+            <filter>library['type'] == 'paired' or library['type'] == 'pairedcollection'</filter>
+        </data>
+        <data name="logfile" format="txt" label="${tool.name} on ${on_string}: log" />
+        <data name="virulotyper" format="tabular" label="Virulotyper on ${on_string}" hidden="true">
+            <filter>virulotyping</filter>
+        </data>
+        <data name="stx" format="tabular" label="Shiga toxin subtyper on ${on_string}" hidden="true" >
+            <filter>shigatoxintyping</filter>
+        </data>
+        <data name="mlstsevenloci" format="tabular" label="Multi Locus on ${on_string}" hidden="true" />
+        <data name="antigen_O" format="tabular" label="Antigen_O typer on ${on_string}" hidden="true">
+            <filter>serotyping</filter>
+        </data>
+        <data name="antigen_H" format="tabular" label="Antigen_H typer on ${on_string}" hidden="true">
+            <filter>serotyping</filter>
+        </data>
+        <data name="amr" format="tabular" label="AMR typer on ${on_string}" hidden="true">
+            <filter>amrtyping</filter>
+        </data>
+        <data name="report_out" format="html" label="${tool.name} on ${on_string}: report"></data>
+    </outputs>
+
+    <tests>
+        <test>
+            <!-- basic test on contigs file -->
+            <param name="type" value="single"/>
+            <param name="input_1" value="a_reads.fastq" ftype="fastqsanger"/>
+            <param name="serotyping" value="true"/>
+            <output name="report_out">
+                <assert_contents>
+                    <has_text text="wzx_208_AF529080_O26" />
+                    <has_text text="wzy_192_AF529080_O26" />
+                    <has_text text="fliC_269_AY337465_H11" />
+                    <has_text text="fliC_276_AY337472_H11" />
+                </assert_contents>
+            </output>
+            <output name="antigen_O" file="antigen_O" ftype="tabular" />
+            <output name="antigen_H" file="antigen_H" ftype="tabular" />
+        </test>
+    </tests>
+
+    <help>
+**EURL VTEC WGS PT Overview**
+This tool performs various typing tools:
+
+- Raw data quality check (FASTQC)
+
+- Trimming (FASTQ positional and quality trimming)
+
+- Assembly (SPAdes)
+
+- Virulotyping (patho_typing tool from the INNUENDO Project)
+
+- Multi Locus Sequence Typing (MentaLiST 7 loci)
+
+- Serotyping (mmseqs2)
+
+- Shigatoxintyping (mmseqs2 against the shiga toxin subtype database from the Statens Serum Institut SSI and Technical University of Denmark DTU)
+
+- AMR typing (AMRFinderPlus)
+
+Istituto Superiore di Sanità
+
+European Union Reference Laboratory (EU-RL) for Escherichia coli, including Verotoxigenic E. coli (VTEC)
+
+Developer: Arnold Knijn arnold.knijn@iss.it
+
+The development of the Virulotyping tool has been supported by INNUENDO project (https://www.innuendoweb.org) co-funded by the European Food Safety Authority (EFSA), grant agreement GP/EFSA/AFSCO/2015/01/CT2
+("New approaches in identifying and characterizing microbial and chemical hazards") and by the ONEIDA project (LISBOA-01-0145-FEDER-016417) co-funded by FEEI - “Fundos Europeus Estruturais e de Investimento” 
+from “Programa Operacional Regional Lisboa 2020” and by national funds from FCT - “Fundação para a Ciência e a Tecnologia” and BacGenTrack (TUBITAK/0004/2014) 
+[FCT/ Scientific and Technological Research Council of Turkey (Türkiye Bilimsel ve Teknolojik Araşrrma Kurumu, TÜBITAK)].
+    </help>
+    <citations>
+      <citation type="bibtex">@ARTICLE{andrews_s,
+            author = {Andrews, S},
+            keywords = {bioinformatics, ngs, qc},
+            title = {{FastQC A Quality Control tool for High Throughput Sequence Data}},
+            url = {http://www.bioinformatics.babraham.ac.uk/projects/fastqc/}
+        }</citation>
+      <citation type="doi">10.1093/bioinformatics/btu135</citation>
+      <citation type="doi">10.1186/gb-2009-10-3-r25</citation>
+      <citation type="doi">10.1038/nmeth.1923</citation>
+      <citation type="doi">10.1099/mgen.0.000146</citation>
+      <citation type="doi">10.1089/cmb.2012.0021</citation>
+      <citation type="doi">10.1038/s41467-018-04964-5</citation>
+	  <citation type="doi">10.1128/AAC.00483-19</citation>
+      <citation type="doi">10.1128/JCM.00008-15</citation>
+    </citations>
+</tool>

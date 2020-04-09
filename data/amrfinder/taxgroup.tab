@@ -1,0 +1,9 @@
+#taxgroup	gpipe_taxgroup	number_of_nucl_ref_genes
+Campylobacter	Campylobacter	2
+Enterococcus_faecalis	Enterococcus_faecalis	0
+Enterococcus_faecium	Enterococcus_faecium	0
+Escherichia	Escherichia_coli_Shigella	5
+Klebsiella	Klebsiella	0
+Salmonella	Salmonella	1
+Staphylococcus	Staphylococcus_pseudintermedius	0
+Vibrio_cholerae	Vibrio_cholerae	0
