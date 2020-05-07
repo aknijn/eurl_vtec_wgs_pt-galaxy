@@ -1,1 +1,0 @@
-awk '($3>0.99 && $4>1200) { printf "%s\t%.2f\t%s\t%s\n", $2, $3*100, $5, $4 }' mmseqs_STX > mmseqs_shigatoxin_fc

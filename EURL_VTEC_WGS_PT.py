@@ -11,6 +11,8 @@
 import argparse
 import sys
 import os
+import shutil
+import subprocess
 import HTML
 import datetime
 import fileinput
@@ -60,12 +62,14 @@ def __main__():
     parser.add_argument('--html2_id', dest='html2_id', help='html FASTQC file id')
     parser.add_argument('--html2_path', dest='html2_path', help='html FASTQC file path')
     parser.add_argument('--text2', dest='text2', help='text FASTQC file')
+    parser.add_argument('--contigs', dest='contigs', help='Assembly contigs')
+    parser.add_argument('--quast', dest='quast', help='Quast report')
     parser.add_argument('--log', dest='logfile', help='log file')
     parser.add_argument('--virulotyper', dest='virulotyper', help='Virulotyping Mapping reads')
     parser.add_argument('--virulotyper_id', dest='virulotyper_id', help='Virulotyping Mapping reads id')
     parser.add_argument('--stx', dest='stx', help='Shiga toxin')
     parser.add_argument('--mlstsevenloci', dest='mlstsevenloci', help='Multi Locus Alleles table')
-    parser.add_argument('--amr', dest='amr', help='SPAdes log')
+    parser.add_argument('--amr', dest='amrgenes', help='AMR genes')
     parser.add_argument('--amr_id', dest='amr_id', help='AMR file id')
     parser.add_argument('--antigen_O', dest='antigen_O', help='Antigen for O')
     parser.add_argument('--antigen_H', dest='antigen_H', help='Antigen for H')
@@ -73,57 +77,54 @@ def __main__():
     args = parser.parse_args()
 
     log = open(args.logfile, 'w')
-    log.write("EURL VTEC WGS PT v3.0\n\nTool versions\n=============\n")
+    log.write("EURL VTEC WGS PT v4.0\n\nTool versions\n=============\n")
+    os.system("ln -s " + os.popen("which trimmomatic.jar").read().strip() + " trimmomatic.jar")
+    # FASTQC
+    subprocess.call("python " + TOOL_DIR + "/scripts/rgFastQC.py -i " + args.input1 + " -d " + args.html1_path + " -o " + args.html1 + " -t " + args.text1 + " -f " + args.input1_ext + " -j " + args.input1_name + " -e " + "fastqc", shell=True)
+    log.write(os.popen("fastqc -v").read())
     if args.input2:
         # FASTQC
-        os.system("python " + TOOL_DIR + "/scripts/rgFastQC.py -i " + args.input1 + " -d " + args.html1_path + " -o " + args.html1 + " -t " + args.text1 + " -f " + args.input1_ext + " -j " + args.input1_name + " -e " + "fastqc")
-        os.system("rm -r " + args.html1_path)
-        os.system("python " + TOOL_DIR + "/scripts/rgFastQC.py -i " + args.input2 + " -d " + args.html2_path + " -o " + args.html2 + " -t " + args.text2 + " -f " + args.input2_ext + " -j " + args.input2_name + " -e " + "fastqc")
-        os.system("rm -r " + args.html2_path)
-        log.write(os.popen("fastqc -v").read())
+        subprocess.call("python " + TOOL_DIR + "/scripts/rgFastQC.py -i " + args.input2 + " -d " + args.html2_path + " -o " + args.html2 + " -t " + args.text2 + " -f " + args.input2_ext + " -j " + args.input2_name + " -e " + "fastqc", shell=True)
         # TRIMMING
-        os.system("python " + TOOL_DIR + "/scripts/fastq_positional_quality_trimming.py -1 " + args.input1 + " --maxlt 300 --lt 17 --rt 0 --minqt 25 --avgqt 27.0 --minlf -1 --trimmed1 input_t1.fq --log trimming_logfile -2 " + args.input2 + " --trimmed2 input_t2.fq --trimmedunpaired trimmedunpaired")
-        log.write("\nfastq_positional_quality_trimming v1.0\n")
-        log.write("parameters: maxlt=300, lt=17, rt=0, minqt=25, avgqt=27.0, minlf=-1\n")
-        if args.shigatoxintyping or args.serotyping:
-            # ASSEMBLY
-            os.system("perl " + TOOL_DIR + "/scripts/spades.pl contigs.fa spades_contig_stats spades_scaffolds spades_scaffold_stats spades_log NODE spades.py --disable-gzip-output --isolate -t \${GALAXY_SLOTS:-16} --pe1-ff --pe1-1 fastq:input_t1.fq --pe1-2 fastq:input_t2.fq")
-            log.write(os.popen("spades.py -v").read())
-            log.write("parameters: --isolate, pe1-ff, pe1-1, pe1-2\n\n")
-        if args.virulotyping:
-            # VIRULOTYPER
-            os.system("perl " + TOOL_DIR + "/scripts/patho_typing.pl 'python " + TOOL_DIR + "/scripts/patho_typing.py -s Escherichia coli -f " + args.input1 + " " + args.input2 + " -o output_dir -j 1 --minGeneCoverage 90 --minGeneIdentity 90 --minGeneDepth 15'")
-            os.system("cat pathotyper_rep_tot_tab > " + args.virulotyper)
-            log.write("\n\nViruloTyper\n===========\npatho_typing v1.0\n")
-            log.write("parameters: minGeneCoverage=90, minGeneIdentity=90, minGeneDepth=15\n\n")
-            log.write(os.popen("cat " +  TOOL_DIR + "/data/ViruloTyping_db.txt").read())
+        subprocess.call("java ${_JAVA_OPTIONS:--Xmx8G} -jar trimmomatic.jar PE -threads ${GALAXY_SLOTS:-6} -phred33 " + args.input1 + " " + args.input2 + " trimmed1 trimmed1unpaired trimmed2 trimmed2unpaired SLIDINGWINDOW:5:20 LEADING:3 TRAILING:3 MINLEN:36", shell=True)
+        log.write("\nTrimmomatic v0.39\n")
+        log.write("parameters: phred33 SLIDINGWINDOW:5:20 LEADING:3 TRAILING:3 MINLEN:36\n\n")
+        # ASSEMBLY
+        subprocess.call("perl " + TOOL_DIR + "/scripts/spades.pl spades_contigs spades_contig_stats spades_scaffolds spades_scaffold_stats spades_log NODE spades.py --disable-gzip-output --isolate -t ${GALAXY_SLOTS:-16} --pe1-ff --pe1-1 fastq:trimmed1.fq --pe1-2 fastq:trimmed2.fq", shell=True)
+        subprocess.call("perl " + TOOL_DIR + "/scripts/filter_spades_repeats.pl -i spades_contigs -t spades_contig_stats -c 0.33 -r 1.75 -l 1000 -o output_with_repeats -u output_without_repeats -n repeat_sequences_only -e 5000 -f discarded_sequences -s summary", shell=True)
+        shutil.move("output_without_repeats", args.contigs)
+        log.write(os.popen("spades.py -v").read())
+        log.write("parameters: --isolate, pe1-ff, pe1-1, pe1-2 filter_repeats\n\n")
     else:
-        # FASTQC
-        os.system("python " + TOOL_DIR + "/scripts/rgFastQC.py -i " + args.input1 + " -d " + args.html1_path + " -o " + args.html1 + " -t " + args.text1 + " -f " + args.input1_ext + " -j " + args.input1_name + " -e " + "fastqc")
-        os.system("rm -r " + args.html1_path)
-        log.write(os.popen("fastqc -v").read())
         # TRIMMING
-        os.system("python " + TOOL_DIR + "/scripts/fastq_positional_quality_trimming.py -1 " + args.input1 + " --maxlt 360 --lt 10 --rt 0 --minqt 25 --avgqt 27.0 --minlf 50 --trimmed1 input_t1.fq --log trimming_logfile")
-        log.write("\nfastq_positional_quality_trimming v1.0\n")
-        log.write("parameters: maxlt=360, lt=10, rt=0, minqt=25, avgqt=27.0, minlf=50\n")
-        if args.shigatoxintyping or args.serotyping:
-            # ASSEMBLY
-            os.system("perl " + TOOL_DIR + "/scripts/spades.pl contigs.fa spades_contig_stats spades_scaffolds spades_scaffold_stats spades_log NODE spades.py --disable-gzip-output --isolate -t ${GALAXY_SLOTS:-16} --iontorrent -s fastq:input_t1.fq")
-            log.write(os.popen("spades.py -v").read())
-            log.write("parameters: --isolate, --iontorrent\n\n")
-        if args.virulotyping:
-            # VIRULOTYPER
-            os.system("perl " + TOOL_DIR + "/scripts/patho_typing.pl 'python " + TOOL_DIR + "/scripts/patho_typing.py -s Escherichia coli -f " + args.input1 + " -o output_dir -j 1 --minGeneCoverage 90 --minGeneIdentity 90 --minGeneDepth 15'")
-            os.system("cat pathotyper_rep_tot_tab > " + args.virulotyper)
-            log.write("\n\nViruloTyper\n===========\npatho_typing v1.0\n")
-            log.write("parameters: minGeneCoverage=90, minGeneIdentity=90, minGeneDepth=15\n\n")
-            log.write(os.popen("cat " +  TOOL_DIR + "/data/ViruloTyping_db.txt").read())
+        subprocess.call("java ${_JAVA_OPTIONS:--Xmx8G} -jar trimmomatic.jar SE -threads ${GALAXY_SLOTS:-6} -phred33 " + args.input1 + " trimmed1.fq SLIDINGWINDOW:5:20 LEADING:3 TRAILING:3 MINLEN:55", shell=True)
+        log.write("\nTrimmomatic v0.39\n")
+        log.write("parameters: phred33 SLIDINGWINDOW:5:20 LEADING:3 TRAILING:3 MINLEN:55\n\n")
+        # ASSEMBLY
+        subprocess.call("perl " + TOOL_DIR + "/scripts/spades.pl spades_contigs spades_contig_stats spades_scaffolds spades_scaffold_stats spades_log NODE spades.py --disable-gzip-output --isolate -t ${GALAXY_SLOTS:-16} --iontorrent -s fastq:trimmed1.fq", shell=True)
+        subprocess.call("perl " + TOOL_DIR + "/scripts/filter_spades_repeats.pl -i spades_contigs -t spades_contig_stats -c 0.33 -r 1.75 -l 1000 -o output_with_repeats -u output_without_repeats -n repeat_sequences_only -e 5000 -f discarded_sequences -s summary", shell=True)
+        shutil.move("output_without_repeats", args.contigs)
+        log.write(os.popen("spades.py -v").read())
+        log.write("parameters: --isolate, --iontorrent filter_repeats\n\n")
+    # QUAST
+    subprocess.call("quast --threads 4 -o outputdir --est-ref-size 5000000 --min-contig 500 -l  '" + args.input1_name + "' --contig-thresholds 0,1000 " + args.contigs, shell=True)
+    shutil.move("outputdir/report.tsv", args.quast)
+    if args.virulotyping:
+        # VIRULOTYPER
+        if args.input2:
+            subprocess.call("perl " + TOOL_DIR + "/scripts/patho_typing.pl 'python " + TOOL_DIR + "/scripts/patho_typing.py -s Escherichia coli -f " + args.input1 + " " + args.input2 + " -o output_dir -j 4 --minGeneCoverage 90 --minGeneIdentity 90 --minGeneDepth 15'", shell=True)
+        else:
+            subprocess.call("perl " + TOOL_DIR + "/scripts/patho_typing.pl 'python " + TOOL_DIR + "/scripts/patho_typing.py -s Escherichia coli -f " + args.input1 + " -o output_dir -j 4 --minGeneCoverage 90 --minGeneIdentity 90 --minGeneDepth 15'", shell=True)
+        subprocess.call("(head -n 1 pathotyper_rep_tot_tab && tail -n +2 pathotyper_rep_tot_tab | sort -k 2rn) > " + args.virulotyper, shell=True)
+        log.write("\n\nViruloTyper\n===========\npatho_typing v1.0\n")
+        log.write("parameters: minGeneCoverage=90, minGeneIdentity=90, minGeneDepth=15\n\n")
+        log.write(os.popen("cat " +  TOOL_DIR + "/data/ViruloTyping_db.txt").read())
     # SEQUENCETYPER
     if args.input2:
-        os.system("mentalist call --output_votes -o 'mentalist_out' --db '" + TOOL_DIR + "/data/escherichia_coli_pubmlst_k31_2018-10-09/escherichia_coli_pubmlst_k31_m023_2018-10-09.jld' -1 input_t1.fq -2 input_t2.fq")
+        subprocess.call("mentalist call --output_votes -o 'mentalist_out' --db '" + TOOL_DIR + "/data/escherichia_coli_pubmlst_k31_2018-10-09/escherichia_coli_pubmlst_k31_m023_2018-10-09.jld' -1 trimmed1.fq -2 trimmed2.f", shell=True)
     else:
-        os.system("mentalist call --output_votes -o 'mentalist_out' --db '" + TOOL_DIR + "/data/escherichia_coli_pubmlst_k31_2018-10-09/escherichia_coli_pubmlst_k31_m023_2018-10-09.jld' -1 input_t1.fq")
-    os.system("mv mentalist_out.byvote " + args.mlstsevenloci)
+        subprocess.call("mentalist call --output_votes -o 'mentalist_out' --db '" + TOOL_DIR + "/data/escherichia_coli_pubmlst_k31_2018-10-09/escherichia_coli_pubmlst_k31_m023_2018-10-09.jld' -1 trimmed1.fq", shell=True)
+    shutil.move("mentalist_out.byvote", args.mlstsevenloci)
     sequence_typing = openFileAsTable(args.mlstsevenloci)
     sequence_qc = openFileAsTable("mentalist_out.coverage.txt")
     log.write("\n\nSequence Typer\n==============\n")
@@ -132,33 +133,39 @@ def __main__():
     log.write(os.popen("cat " +  TOOL_DIR + "/data/SequenceTyping_db.txt").read())
     if args.shigatoxintyping:
         # SHIGATOXIN TYPER
-        os.system("echo 'sseqid\tpident\tlength\tpositive' > mmseqs_shigatoxin_fct")
-        os.system("mmseqs easy-search --search-type 3 --format-output query,target,pident,alnlen,tlen contigs.fa " + TOOL_DIR + "/data/stxDB mmseqs_STX /tmp")
-        os.system(TOOL_DIR + "/scripts/extract_shigatoxin.sh")
-        os.system("cat mmseqs_shigatoxin_fc >> mmseqs_shigatoxin_fct")
-        shigatoxin_typing = openFileAsTable("mmseqs_shigatoxin_fc")
-        log.write("\n\nShigatoxin Typer\n==============\n")
+        if args.input2:
+            # CONSENSUS
+            subprocess.call(TOOL_DIR + "/scripts/stx_subtype_pe.sh " + TOOL_DIR + " trimmed1.fq trimmed2.fq " + args.contigs, shell=True)
+        else:
+            # CONSENSUS
+            subprocess.call(TOOL_DIR + "/scripts/stx_subtype_se.sh " + TOOL_DIR + " trimmed1.fq " + args.contigs, shell=True)
+        # SHIGATOXIN SEQUENCE SEARCH
+        subprocess.call(TOOL_DIR + "/scripts/stx_subtype_fa.sh " + TOOL_DIR + " stx.fasta", shell=True)
+        subprocess.call("echo 'sseqid\tpident\tlength\tpositive' > shigatoxin_fct", shell=True)
+        subprocess.call("cat mmseqs_shigatoxin_fc >> shigatoxin_fct", shell=True)
+        shigatoxin_typing = openFileAsTable("shigatoxin_fc")
+        log.write("\n\nShigatoxin Typer v2.0\n==============\n")
         log.write(os.popen("cat " +  TOOL_DIR + "/data/ShigatoxinTyping_db.txt").read())
     if args.serotyping:        
         # SEROTYPER
-        os.system("echo 'sseqid\tpident\tlength\tpositive' > mmseqs_OH_fc")
+        subprocess.call("echo 'sseqid\tpident\tlength\tpositive' > mmseqs_OH_fc", shell=True)
         # SEROTYPER O
-        os.system("mmseqs easy-search --search-type 3 --format-output target,pident,alnlen,tlen contigs.fa " + TOOL_DIR + "/data/O_typeDB mmseqs_O /tmp")
-        os.system("awk -F '\t' '($3>800 && $4>800) { print $1 FS $2 FS $3 FS $4 }' mmseqs_O | sort -nrk 2 -nrk 3 > mmseqs_O_fc")
+        subprocess.call("mmseqs easy-search --search-type 3 --format-output target,pident,alnlen,tlen " + args.contigs + " " + TOOL_DIR + "/data/O_typeDB mmseqs_O /tmp", shell=True)
+        subprocess.call("awk -F '\t' '($3>800 && $4>800) { print $1 FS $2 FS $3 FS $4 }' mmseqs_O | sort -nrk 2 -nrk 3 > mmseqs_O_fc", shell=True)
         sero_typing_o = openFileAsTable("mmseqs_O_fc")
-        os.system("cat mmseqs_O_fc >> mmseqs_OH_fc")
+        subprocess.call("cat mmseqs_O_fc >> mmseqs_OH_fc", shell=True)
         # SEROTYPER H
-        os.system("mmseqs easy-search --search-type 3 --format-output target,pident,alnlen,tlen contigs.fa " + TOOL_DIR + "/data/H_typeDB mmseqs_H /tmp")
-        os.system("awk -F '\t' '($3>800 && $4>800) { print $1 FS $2 FS $3 FS $4 }' mmseqs_H | sort -nrk 2 -nrk 3 > mmseqs_H_fc")
+        subprocess.call("mmseqs easy-search --search-type 3 --format-output target,pident,alnlen,tlen " + args.contigs + " " + TOOL_DIR + "/data/H_typeDB mmseqs_H /tmp")
+        subprocess.call("awk -F '\t' '($3>800 && $4>800) { print $1 FS $2 FS $3 FS $4 }' mmseqs_H | sort -nrk 2 -nrk 3 > mmseqs_H_fc")
         sero_typing_h = openFileAsTable("mmseqs_H_fc")
-        os.system("cat mmseqs_H_fc >> mmseqs_OH_fc")    
+        subprocess.call("cat mmseqs_H_fc >> mmseqs_OH_fc", shell=True)
         if os.stat('mmseqs_O_fc').st_size == 0 and os.stat('mmseqs_H_fc').st_size == 0:
-            os.system("echo '-\t-\t-\t-' >> mmseqs_OH_fc")
+            subprocess.call("echo '-\t-\t-\t-' >> mmseqs_OH_fc", shell=True)
         log.write("\n\nSero Typer\n==============\n")
         log.write(os.popen("cat " +  TOOL_DIR + "/data/SeroTyping_db.txt").read())
     if args.amrtyping:
         # AMRGENES
-        os.system("amrfinder --threads 4 --database " + TOOL_DIR + "/data/amrfinder -n contigs.fa -O Escherichia -o " + args.amr)
+        subprocess.call("amrfinder --threads 4 --database " + TOOL_DIR + "/amrfinder -n " + args.contigs + " -O Escherichia -o " + args.amrgenes, shell=True)
         log.write("\n\nAMR Typer\n==============\nAMRFinderPlus ")
         log.write(os.popen("amrfinder --version").read())
         log.write("\ndatabase version: ")
@@ -192,7 +199,7 @@ def __main__():
             report.write("ST%s" % sequence_typing[1][8])
         report.write("</p>\n")
         if args.virulotyping:
-            os.system("sort " + args.virulotyper  + " | awk '/eae_|stx1._|stx2._|ehxa_/ && $2>50 && !seen[substr($1, 1, index($1, \"_\")-2)]++ { printf(\"%s%s\",sep,substr($1, 1, index($1, \"_\")-1));sep=\", \" }END{print \"\"}' > virulotyper_rep")
+            subprocess.call("sort " + args.virulotyper  + " | awk '/eae_|stx1._|stx2._|ehxa_/ && $2>50 && !seen[substr($1, 1, index($1, \"_\")-2)]++ { printf(\"%s%s\",sep,substr($1, 1, index($1, \"_\")-1));sep=\", \" }END{print \"\"}' > virulotyper_rep", shell=True)
             for line in fileinput.input("virulotyper_rep", inplace=True):
                 print(line.replace("1a", "1"),)
             for line in fileinput.input("virulotyper_rep", inplace=True):
@@ -207,19 +214,33 @@ def __main__():
         if args.shigatoxintyping:
             report.write("<p>Stx Subtypes: ")
             if len(shigatoxin_typing) == 0:
-                report.write("No subtype match found")
+                str_shigatoxin_subtype = "No subtype match found"
             else:
-                shigatoxin_subtype = ""
+                # get corresponding subtypes
+                str_shigatoxin_subtype = ""
+                shigatoxin_subtypes = []
+                shigatoxin_subtypes_raw = []
                 shigatoxin_types = openFileAsTable(TOOL_DIR + "/data/stx_subtypes")
                 for subtype in shigatoxin_typing:
                     blast_pident_100 = float(subtype[1]) == 100
                     if (blast_pident_100):
                         for item in shigatoxin_types:
-                            if item[0] == subtype[0]:
-                                shigatoxin_subtype = item[1] + " " + shigatoxin_subtype
-                if len(shigatoxin_subtype) == 0:
-                    shigatoxin_subtype = "No complete subtype match found"
-                report.write("%s" % shigatoxin_subtype)
+                            if item[0] == subtype[0] and item[1] not in shigatoxin_subtypes_raw:
+                                shigatoxin_subtypes.append(item[1])
+                                shigatoxin_subtypes_raw.append(item[1])
+               # partial matches
+                for subtype in shigatoxin_typing:
+                    for item in shigatoxin_types:
+                        if item[0] == subtype[0] and item[1] not in shigatoxin_subtypes_raw:
+                            if item[1][0:4] == "stx1":
+                                shigatoxin_subtypes.append(item[1] + "(" + str(float(subtype[1])) + ")")
+                                shigatoxin_subtypes_raw.append(item[1])
+                            if item[1][0:4] == "stx2":
+                                shigatoxin_subtypes.append(item[1] + "(" + str(float(subtype[1])) + ")")
+                                shigatoxin_subtypes_raw.append(item[1])
+                shigatoxin_subtypes.sort()
+                str_shigatoxin_subtype = " ".join(shigatoxin_subtypes)
+            report.write("%s" % str_shigatoxin_subtype)
             report.write("</p>\n")
         # Quality Check
         disclaimer = False
@@ -250,7 +271,7 @@ def __main__():
             insertFileAsTable("pathotyper_rep_tab", report, True, "table table-cross")
         if args.shigatoxintyping:
             report.write("<br/><hr/><h3>Shiga toxin typing</h3>\n")
-            insertFileAsTable("mmseqs_shigatoxin_fct", report, True)
+            insertFileAsTable("shigatoxin_fct", report, True)
         if args.amrtyping:
             report.write("<br/><hr/><h3>AMR typing</h3>\n")
             report.write("<p>AMR result: <a href='%s/datasets/%s/display/?preview=True'>Webpage</a></p>\n" % (BASE_URL, args.amr_id))
