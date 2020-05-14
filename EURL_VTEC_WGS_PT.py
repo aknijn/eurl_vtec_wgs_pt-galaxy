@@ -142,7 +142,8 @@ def __main__():
         # SHIGATOXIN SEQUENCE SEARCH
         subprocess.call(TOOL_DIR + "/scripts/stx_subtype_fa.sh " + TOOL_DIR + " stx.fasta", shell=True)
         subprocess.call("echo 'sseqid\tpident\tlength\tpositive' > shigatoxin_fct", shell=True)
-        subprocess.call("cat mmseqs_shigatoxin_fc >> shigatoxin_fct", shell=True)
+        subprocess.call("cat shigatoxin_fc >> shigatoxin_fct", shell=True)
+        shutil.move("shigatoxin_fct", args.stx)
         shigatoxin_typing = openFileAsTable("shigatoxin_fc")
         log.write("\n\nShigatoxin Typer v2.0\n==============\n")
         log.write(os.popen("cat " +  TOOL_DIR + "/data/ShigatoxinTyping_db.txt").read())
@@ -154,18 +155,20 @@ def __main__():
         subprocess.call("awk -F '\t' '($3>800 && $4>800) { print $1 FS $2 FS $3 FS $4 }' mmseqs_O | sort -nrk 2 -nrk 3 > mmseqs_O_fc", shell=True)
         sero_typing_o = openFileAsTable("mmseqs_O_fc")
         subprocess.call("cat mmseqs_O_fc >> mmseqs_OH_fc", shell=True)
+        shutil.move("mmseqs_O_fc", args.antigen_O)
         # SEROTYPER H
-        subprocess.call("mmseqs easy-search --search-type 3 --format-output target,pident,alnlen,tlen " + args.contigs + " " + TOOL_DIR + "/data/H_typeDB mmseqs_H /tmp")
-        subprocess.call("awk -F '\t' '($3>800 && $4>800) { print $1 FS $2 FS $3 FS $4 }' mmseqs_H | sort -nrk 2 -nrk 3 > mmseqs_H_fc")
+        subprocess.call("mmseqs easy-search --search-type 3 --format-output target,pident,alnlen,tlen " + args.contigs + " " + TOOL_DIR + "/data/H_typeDB mmseqs_H /tmp", shell=True)
+        subprocess.call("awk -F '\t' '($3>800 && $4>800) { print $1 FS $2 FS $3 FS $4 }' mmseqs_H | sort -nrk 2 -nrk 3 > mmseqs_H_fc", shell=True)
         sero_typing_h = openFileAsTable("mmseqs_H_fc")
         subprocess.call("cat mmseqs_H_fc >> mmseqs_OH_fc", shell=True)
-        if os.stat('mmseqs_O_fc').st_size == 0 and os.stat('mmseqs_H_fc').st_size == 0:
+        shutil.move("mmseqs_H_fc", args.antigen_H)
+        if os.stat(args.antigen_O).st_size == 0 and os.stat(args.antigen_H).st_size == 0:
             subprocess.call("echo '-\t-\t-\t-' >> mmseqs_OH_fc", shell=True)
         log.write("\n\nSero Typer\n==============\n")
         log.write(os.popen("cat " +  TOOL_DIR + "/data/SeroTyping_db.txt").read())
     if args.amrtyping:
         # AMRGENES
-        subprocess.call("amrfinder --threads 4 --database " + TOOL_DIR + "/amrfinder -n " + args.contigs + " -O Escherichia -o " + args.amrgenes, shell=True)
+        subprocess.call("amrfinder --threads 4 --database " + TOOL_DIR + "/data/amrfinder -n " + args.contigs + " -O Escherichia -o " + args.amrgenes, shell=True)
         log.write("\n\nAMR Typer\n==============\nAMRFinderPlus ")
         log.write(os.popen("amrfinder --version").read())
         log.write("\ndatabase version: ")
@@ -271,7 +274,7 @@ def __main__():
             insertFileAsTable("pathotyper_rep_tab", report, True, "table table-cross")
         if args.shigatoxintyping:
             report.write("<br/><hr/><h3>Shiga toxin typing</h3>\n")
-            insertFileAsTable("shigatoxin_fct", report, True)
+            insertFileAsTable(args.stx, report, True)
         if args.amrtyping:
             report.write("<br/><hr/><h3>AMR typing</h3>\n")
             report.write("<p>AMR result: <a href='%s/datasets/%s/display/?preview=True'>Webpage</a></p>\n" % (BASE_URL, args.amr_id))
