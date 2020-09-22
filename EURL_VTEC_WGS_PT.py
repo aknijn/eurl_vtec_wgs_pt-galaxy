@@ -86,7 +86,7 @@ def __main__():
         # FASTQC
         subprocess.call("python " + TOOL_DIR + "/scripts/rgFastQC.py -i " + args.input2 + " -d " + args.html2_path + " -o " + args.html2 + " -t " + args.text2 + " -f " + args.input2_ext + " -j " + args.input2_name + " -e " + "fastqc", shell=True)
         # TRIMMING
-        subprocess.call("java ${_JAVA_OPTIONS:--Xmx8G} -jar trimmomatic.jar PE -threads ${GALAXY_SLOTS:-6} -phred33 " + args.input1 + " " + args.input2 + " trimmed1 trimmed1unpaired trimmed2 trimmed2unpaired SLIDINGWINDOW:5:20 LEADING:3 TRAILING:3 MINLEN:36", shell=True)
+        subprocess.call("java ${_JAVA_OPTIONS:--Xmx8G} -jar trimmomatic.jar PE -threads ${GALAXY_SLOTS:-6} -phred33 " + args.input1 + " " + args.input2 + " trimmed1.fq trimmed1unpaired trimmed2.fq trimmed2unpaired SLIDINGWINDOW:5:20 LEADING:3 TRAILING:3 MINLEN:36", shell=True)
         log.write("\nTrimmomatic v0.39\n")
         log.write("parameters: phred33 SLIDINGWINDOW:5:20 LEADING:3 TRAILING:3 MINLEN:36\n\n")
         # ASSEMBLY
@@ -121,7 +121,7 @@ def __main__():
         log.write(os.popen("cat " +  TOOL_DIR + "/data/ViruloTyping_db.txt").read())
     # SEQUENCETYPER
     if args.input2:
-        subprocess.call("mentalist call --output_votes -o 'mentalist_out' --db '" + TOOL_DIR + "/data/escherichia_coli_pubmlst_k31_2018-10-09/escherichia_coli_pubmlst_k31_m023_2018-10-09.jld' -1 trimmed1.fq -2 trimmed2.f", shell=True)
+        subprocess.call("mentalist call --output_votes -o 'mentalist_out' --db '" + TOOL_DIR + "/data/escherichia_coli_pubmlst_k31_2018-10-09/escherichia_coli_pubmlst_k31_m023_2018-10-09.jld' -1 trimmed1.fq -2 trimmed2.fq", shell=True)
     else:
         subprocess.call("mentalist call --output_votes -o 'mentalist_out' --db '" + TOOL_DIR + "/data/escherichia_coli_pubmlst_k31_2018-10-09/escherichia_coli_pubmlst_k31_m023_2018-10-09.jld' -1 trimmed1.fq", shell=True)
     shutil.move("mentalist_out.byvote", args.mlstsevenloci)
