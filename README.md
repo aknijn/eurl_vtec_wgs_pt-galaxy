@@ -16,6 +16,6 @@ The files duk, fastq_pair, stx_subtype_fa.sh, stx_subtype_pe.sh, stx_subtype_se.
 
 In order to make trimmomatic work, you will have to create the following symbolic link
 
-    cd /afs/galaxy/t_d_d/_conda/envs/mulled-v1-9471dd12387e90c11124403c650a667dc2a8c932d610ab6fc4cf2e3f4b40720c/bin
+    cd /$GALAXY_DIR/tool_dependency_dir/_conda/envs/mulled-v1-9471dd12387e90c11124403c650a667dc2a8c932d610ab6fc4cf2e3f4b40720c/bin
     chmod 755 ../share/trimmomatic-0.39-1/trimmomatic.jar
     ln -s ../share/trimmomatic-0.39-1/trimmomatic.jar trimmomatic.jar
