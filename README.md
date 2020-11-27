@@ -15,6 +15,7 @@ After installation the BASE_URL parameter in the EURL_VTEC_WGS_PT.py (line 20) w
 The files duk, fastq_pair, stx_subtype_fa.sh, stx_subtype_pe.sh, stx_subtype_se.sh in the scripts folder and the file rematch.py in the scripts/ReMatCh folder should have execution rights.  
 
 In order to make trimmomatic work, you will have to create the following symbolic link
+
     cd /afs/galaxy/t_d_d/_conda/envs/mulled-v1-9471dd12387e90c11124403c650a667dc2a8c932d610ab6fc4cf2e3f4b40720c/bin
     chmod 755 ../share/trimmomatic-0.39-1/trimmomatic.jar
     ln -s ../share/trimmomatic-0.39-1/trimmomatic.jar trimmomatic.jar
