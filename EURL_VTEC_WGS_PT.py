@@ -77,7 +77,7 @@ def __main__():
     args = parser.parse_args()
 
     log = open(args.logfile, 'w')
-    log.write("EURL VTEC WGS PT v4.0\n\nTool versions\n=============\n")
+    log.write("EURL VTEC WGS PT v3.2\n\nTool versions\n=============\n")
     os.system("ln -s " + os.popen("which trimmomatic.jar").read().strip() + " trimmomatic.jar")
     # FASTQC
     subprocess.call("python " + TOOL_DIR + "/scripts/rgFastQC.py -i " + args.input1 + " -d " + args.html1_path + " -o " + args.html1 + " -t " + args.text1 + " -f " + args.input1_ext + " -j " + args.input1_name + " -e " + "fastqc", shell=True)
@@ -90,7 +90,7 @@ def __main__():
         log.write("\nTrimmomatic v0.39\n")
         log.write("parameters: phred33 SLIDINGWINDOW:5:20 LEADING:3 TRAILING:3 MINLEN:36\n\n")
         # ASSEMBLY
-        subprocess.call("perl " + TOOL_DIR + "/scripts/spades.pl spades_contigs spades_contig_stats spades_scaffolds spades_scaffold_stats spades_log NODE spades.py --disable-gzip-output --isolate -t ${GALAXY_SLOTS:-16} --pe1-ff --pe1-1 fastq:trimmed1.fq --pe1-2 fastq:trimmed2.fq", shell=True)
+        subprocess.call("perl " + TOOL_DIR + "/scripts/spades.pl spades_contigs spades_contig_stats spades_scaffolds spades_scaffold_stats spades_log NODE spades.py --disable-gzip-output --isolate -t ${GALAXY_SLOTS:-16} --pe1-ff --pe1-1 trimmed1.fq --pe1-2 trimmed2.fq", shell=True)
         subprocess.call("perl " + TOOL_DIR + "/scripts/filter_spades_repeats.pl -i spades_contigs -t spades_contig_stats -c 0.33 -r 1.75 -l 1000 -o output_with_repeats -u output_without_repeats -n repeat_sequences_only -e 5000 -f discarded_sequences -s summary", shell=True)
         shutil.move("output_without_repeats", args.contigs)
         log.write(os.popen("spades.py -v").read())
@@ -101,7 +101,7 @@ def __main__():
         log.write("\nTrimmomatic v0.39\n")
         log.write("parameters: phred33 SLIDINGWINDOW:5:20 LEADING:3 TRAILING:3 MINLEN:55\n\n")
         # ASSEMBLY
-        subprocess.call("perl " + TOOL_DIR + "/scripts/spades.pl spades_contigs spades_contig_stats spades_scaffolds spades_scaffold_stats spades_log NODE spades.py --disable-gzip-output --isolate -t ${GALAXY_SLOTS:-16} --iontorrent -s fastq:trimmed1.fq", shell=True)
+        subprocess.call("perl " + TOOL_DIR + "/scripts/spades.pl spades_contigs spades_contig_stats spades_scaffolds spades_scaffold_stats spades_log NODE spades.py --disable-gzip-output --isolate -t ${GALAXY_SLOTS:-16} --iontorrent -s trimmed1.fq", shell=True)
         subprocess.call("perl " + TOOL_DIR + "/scripts/filter_spades_repeats.pl -i spades_contigs -t spades_contig_stats -c 0.33 -r 1.75 -l 1000 -o output_with_repeats -u output_without_repeats -n repeat_sequences_only -e 5000 -f discarded_sequences -s summary", shell=True)
         shutil.move("output_without_repeats", args.contigs)
         log.write(os.popen("spades.py -v").read())
@@ -120,15 +120,10 @@ def __main__():
         log.write("parameters: minGeneCoverage=90, minGeneIdentity=90, minGeneDepth=15\n\n")
         log.write(os.popen("cat " +  TOOL_DIR + "/data/ViruloTyping_db.txt").read())
     # SEQUENCETYPER
-    if args.input2:
-        subprocess.call("mentalist call --output_votes -o 'mentalist_out' --db '" + TOOL_DIR + "/data/escherichia_coli_pubmlst_k31_2018-10-09/escherichia_coli_pubmlst_k31_m023_2018-10-09.jld' -1 trimmed1.fq -2 trimmed2.fq", shell=True)
-    else:
-        subprocess.call("mentalist call --output_votes -o 'mentalist_out' --db '" + TOOL_DIR + "/data/escherichia_coli_pubmlst_k31_2018-10-09/escherichia_coli_pubmlst_k31_m023_2018-10-09.jld' -1 trimmed1.fq", shell=True)
-    shutil.move("mentalist_out.byvote", args.mlstsevenloci)
+    subprocess.call("mlst --legacy --scheme ecoli " + args.contigs + " | cut -f3,4,5,6,7,8,9,10 > " + args.mlstsevenloci, shell=True)
     sequence_typing = openFileAsTable(args.mlstsevenloci)
-    sequence_qc = openFileAsTable("mentalist_out.coverage.txt")
     log.write("\n\nSequence Typer\n==============\n")
-    log.write(os.popen("mentalist -v | grep MentaLiST").read())
+    log.write(os.popen("mlst -v").read())
     log.write("\n")
     log.write(os.popen("cat " +  TOOL_DIR + "/data/SequenceTyping_db.txt").read())
     if args.shigatoxintyping:
@@ -196,10 +191,10 @@ def __main__():
         report.write("<p>Sequence type: ")
         if len(sequence_typing) < 2:
             report.write("Sequence typing failed")
-        elif sequence_typing[1][1] == "failed":
+        elif sequence_typing[1][1] == "-":
             report.write("Sequence typing failed")
         else:
-            report.write("ST%s" % sequence_typing[1][8])
+            report.write("ST%s" % sequence_typing[1][0])
         report.write("</p>\n")
         if args.virulotyping:
             subprocess.call("sort " + args.virulotyper  + " | awk '/eae_|stx1._|stx2._|ehxa_/ && $2>50 && !seen[substr($1, 1, index($1, \"_\")-2)]++ { printf(\"%s%s\",sep,substr($1, 1, index($1, \"_\")-1));sep=\", \" }END{print \"\"}' > virulotyper_rep", shell=True)
@@ -247,12 +242,7 @@ def __main__():
             report.write("</p>\n")
         # Quality Check
         disclaimer = False
-        sequence_qc_cov = 0
-        for x in range(7):
-            if float(sequence_qc[x+1][2]) < 1:
-                disclaimer = True
-            sequence_qc_cov = sequence_qc_cov + float(sequence_qc[x+1][3])
-        if sequence_qc_cov < 210:
+        if any("-" in s for s in sequence_typing) or any("?" in s for s in sequence_typing):
             disclaimer = True
         if disclaimer:
             report.write("<p style='font-weight:bold;color:red'>Disclaimer: The data analysed do not fulfill minimum quality parameters, please consider repeating the sequencing.</p>\n")

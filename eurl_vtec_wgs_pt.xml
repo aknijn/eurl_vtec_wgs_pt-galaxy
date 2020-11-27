@@ -1,4 +1,4 @@
-<tool id="eurlvtecwgspt" name="EURL VTEC WGS PT" version="3.1">
+<tool id="eurlvtecwgspt" name="EURL VTEC WGS PT" version="3.2">
     <description>performs various typing tools</description>
     <requirements>
         <requirement type="package" version="3.6">python</requirement>
@@ -15,7 +15,7 @@
         <requirement type="package" version="0.11.9">fastqc</requirement>
 		<requirement type="package" version="5.0.2">quast</requirement>
         <requirement type="package" version="3.8">muscle</requirement>
-        <requirement type="package" version="0.2.4">mentalist</requirement>
+        <requirement type="package" version="2.19.0">mlst</requirement>
 		<requirement type="package" version="3.6.7">ncbi-amrfinderplus</requirement>
     </requirements>
     <!-- basic error handling -->
@@ -153,7 +153,7 @@ This tool performs various typing tools:
 
 - Virulotyping (patho_typing tool from the INNUENDO Project)
 
-- Multi Locus Sequence Typing (MentaLiST 7 loci)
+- Multi Locus Sequence Typing (MLST 7 loci)
 
 - Serotyping (mmseqs2)
 
@@ -179,13 +179,33 @@ from “Programa Operacional Regional Lisboa 2020” and by national funds from 
             title = {{FastQC A Quality Control tool for High Throughput Sequence Data}},
             url = {http://www.bioinformatics.babraham.ac.uk/projects/fastqc/}
         }</citation>
-      <citation type="doi">10.1093/bioinformatics/btu135</citation>
+      <citation type="doi">10.1093/bioinformatics/btu170</citation>
       <citation type="doi">10.1186/gb-2009-10-3-r25</citation>
       <citation type="doi">10.1038/nmeth.1923</citation>
-      <citation type="doi">10.1099/mgen.0.000146</citation>
+	  <citation type="bibtex">@ARTICLE{seemann_t,
+            author = {Seemann, T},
+            keywords = {bioinformatics, ngs},
+            title = {{mlst}},
+            url = {https://github.com/tseemann/mlst/}
+        }</citation>
       <citation type="doi">10.1089/cmb.2012.0021</citation>
+	  <citation type="doi">10.1186/s13059-018-1540-z</citation>
       <citation type="doi">10.1038/s41467-018-04964-5</citation>
 	  <citation type="doi">10.1128/AAC.00483-19</citation>
       <citation type="doi">10.1128/JCM.00008-15</citation>
+      <citation type="bibtex">@ARTICLE{andrews_s,
+            author = {Li, M, Copeland, A, and Han, J},
+            keywords = {bioinformatics, ngs},
+            title = {{DUK – A Fast and Efficient Kmer Based Sequence Matching Tool}},
+            url = {https://www.osti.gov/servlets/purl/1016000/}
+        }</citation>
+      <citation type="bibtex">@ARTICLE{andrews_s,
+            author = {Edwards, RA},
+            keywords = {bioinformatics, ngs},
+            title = {{fastq-pair}},
+            url = {https://github.com/linsalrob/EdwardsLab/}
+        }</citation>
+      <citation type="doi">10.1186/1471-2105-10-421</citation>
+	  <citation type="doi">10.1093/nar/gkh340</citation>
     </citations>
 </tool>
