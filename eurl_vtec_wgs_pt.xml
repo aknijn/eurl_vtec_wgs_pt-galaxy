@@ -10,7 +10,7 @@
         <requirement type="package" version="1.3.1">bcftools</requirement>
         <requirement type="package" version="0.7.17">bwa</requirement>
         <requirement type="package">mmseqs2</requirement>
-        <requirement type="package" version="3.14">spades</requirement>
+        <requirement type="package" version="3.14.0">spades</requirement>
         <requirement type="package" version="2.3">skesa</requirement>
         <requirement type="package" version="0.11.9">fastqc</requirement>
 		<requirement type="package" version="5.0.2">quast</requirement>
