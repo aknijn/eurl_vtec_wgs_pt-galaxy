@@ -15,7 +15,7 @@
         <requirement type="package" version="0.11.9">fastqc</requirement>
 		<requirement type="package" version="5.0.2">quast</requirement>
         <requirement type="package" version="3.8">muscle</requirement>
-        <requirement type="package" version="2.19.0">mlst</requirement>
+        <requirement type="package" version="2.16.1">mlst</requirement>
 		<requirement type="package" version="3.6.7">ncbi-amrfinderplus</requirement>
     </requirements>
     <!-- basic error handling -->
