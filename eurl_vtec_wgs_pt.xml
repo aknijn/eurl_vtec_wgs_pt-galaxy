@@ -17,6 +17,7 @@
         <requirement type="package" version="3.8">muscle</requirement>
         <requirement type="package" version="2.16.1">mlst</requirement>
 		<requirement type="package" version="3.6.7">ncbi-amrfinderplus</requirement>
+        <requirement type="package" version="2020.2">tbb</requirement>
     </requirements>
     <!-- basic error handling -->
     <stdio>
