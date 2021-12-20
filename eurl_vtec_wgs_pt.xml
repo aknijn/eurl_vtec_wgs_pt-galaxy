@@ -4,7 +4,7 @@
         <requirement type="package" version="3.6">python</requirement>
         <requirement type="package" version="5.26.2">perl</requirement>
         <requirement type="package" version="1.7">perl-bioperl</requirement>
-		<requirement type="package" version="0.39">trimmomatic</requirement>
+        <requirement type="package" version="0.39">trimmomatic</requirement>
         <requirement type="package" version="2.3.4">bowtie2</requirement>
         <requirement type="package" version="1.3.1">samtools</requirement>
         <requirement type="package" version="1.3.1">bcftools</requirement>
@@ -13,10 +13,10 @@
         <requirement type="package" version="3.14">spades</requirement>
         <requirement type="package" version="2.3">skesa</requirement>
         <requirement type="package" version="0.11.9">fastqc</requirement>
-		<requirement type="package" version="5.0.2">quast</requirement>
+        <requirement type="package" version="5.0.2">quast</requirement>
         <requirement type="package" version="3.8">muscle</requirement>
         <requirement type="package" version="2.16.1">mlst</requirement>
-		<requirement type="package" version="3.6.7">ncbi-amrfinderplus</requirement>
+        <requirement type="package" version="3.6.7">ncbi-amrfinderplus</requirement>
         <requirement type="package" version="2020.2">tbb</requirement>
     </requirements>
     <!-- basic error handling -->
@@ -28,18 +28,18 @@
       python
       $__tool_directory__/EURL_VTEC_WGS_PT.py --log $logfile --output $report_out --contigs $contigs --quast $quast --mlstsevenloci $mlstsevenloci
       #if str( $library.type ) == "single":
-	      -1 ${library.input_1} --input1_ext ${library.input_1.ext} --input1_name '${library.input_1.name}' 
+          -1 ${library.input_1} --input1_ext ${library.input_1.ext} --input1_name '${library.input_1.name}' 
           --html1 $html_file_1 --html1_id $__app__.security.encode_id($html_file_1.dataset.id) --html1_path ${html_file_1.files_path} 
           --text1 $text_file_1
       #elif str( $library.type ) == "paired":
-	      -1 ${library.input_1} --input1_ext ${library.input_1.ext} --input1_name '${library.input_1.name}' 
+          -1 ${library.input_1} --input1_ext ${library.input_1.ext} --input1_name '${library.input_1.name}' 
           --html1 $html_file_1 --html1_id $__app__.security.encode_id($html_file_1.dataset.id) --html1_path ${html_file_1.files_path} 
           --text1 $text_file_1
           -2 ${library.input_2} --input2_ext ${library.input_2.ext} --input2_name '${library.input_2.name}' 
           --html2 $html_file_2 --html2_id $__app__.security.encode_id($html_file_2.dataset.id) --html2_path ${html_file_2.files_path} 
           --text2 $text_file_2
       #elif str( $library.type ) == "pairedcollection":
-	      -1 ${library.input_pc.forward} --input1_ext ${library.input_pc.forward.ext} --input1_name '${library.input_pc.forward.name}' 
+          -1 ${library.input_pc.forward} --input1_ext ${library.input_pc.forward.ext} --input1_name '${library.input_pc.forward.name}' 
           --html1 $html_file_1 --html1_id $__app__.security.encode_id($html_file_1.dataset.id) --html1_path ${html_file_1.files_path} 
           --text1 $text_file_1
           -2 ${library.input_pc.reverse} --input2_ext ${library.input_pc.reverse.ext} --input2_name '${library.input_pc.reverse.name}' 
@@ -61,7 +61,7 @@
       #if $amrtyping:
           --amrtyping
           --amr $amr
-		  --amr_id $__app__.security.encode_id($amr.dataset.id)
+          --amr_id $__app__.security.encode_id($amr.dataset.id)
       #end if
 ]]>
     </command>
@@ -183,16 +183,16 @@ from “Programa Operacional Regional Lisboa 2020” and by national funds from 
       <citation type="doi">10.1093/bioinformatics/btu170</citation>
       <citation type="doi">10.1186/gb-2009-10-3-r25</citation>
       <citation type="doi">10.1038/nmeth.1923</citation>
-	  <citation type="bibtex">@ARTICLE{seemann_t,
+      <citation type="bibtex">@ARTICLE{seemann_t,
             author = {Seemann, T},
             keywords = {bioinformatics, ngs},
             title = {{mlst}},
             url = {https://github.com/tseemann/mlst/}
         }</citation>
       <citation type="doi">10.1089/cmb.2012.0021</citation>
-	  <citation type="doi">10.1186/s13059-018-1540-z</citation>
+      <citation type="doi">10.1186/s13059-018-1540-z</citation>
       <citation type="doi">10.1038/s41467-018-04964-5</citation>
-	  <citation type="doi">10.1128/AAC.00483-19</citation>
+      <citation type="doi">10.1128/AAC.00483-19</citation>
       <citation type="doi">10.1128/JCM.00008-15</citation>
       <citation type="bibtex">@ARTICLE{andrews_s,
             author = {Li, M, Copeland, A, and Han, J},
@@ -207,6 +207,6 @@ from “Programa Operacional Regional Lisboa 2020” and by national funds from 
             url = {https://github.com/linsalrob/EdwardsLab/}
         }</citation>
       <citation type="doi">10.1186/1471-2105-10-421</citation>
-	  <citation type="doi">10.1093/nar/gkh340</citation>
+      <citation type="doi">10.1093/nar/gkh340</citation>
     </citations>
 </tool>
