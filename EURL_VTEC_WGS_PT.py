@@ -130,12 +130,12 @@ def __main__():
         # SHIGATOXIN TYPER
         if args.input2:
             # CONSENSUS
-            subprocess.call(TOOL_DIR + "/scripts/stx_subtype_pe.sh " + TOOL_DIR + " trimmed1.fq trimmed2.fq " + args.contigs, shell=True)
+            subprocess.call("sh " + TOOL_DIR + "/scripts/stx_subtype_pe.sh " + TOOL_DIR + " trimmed1.fq trimmed2.fq " + args.contigs, shell=True)
         else:
             # CONSENSUS
-            subprocess.call(TOOL_DIR + "/scripts/stx_subtype_se.sh " + TOOL_DIR + " trimmed1.fq " + args.contigs, shell=True)
+            subprocess.call("sh " + TOOL_DIR + "/scripts/stx_subtype_se.sh " + TOOL_DIR + " trimmed1.fq " + args.contigs, shell=True)
         # SHIGATOXIN SEQUENCE SEARCH
-        subprocess.call(TOOL_DIR + "/scripts/stx_subtype_fa.sh " + TOOL_DIR + " stx.fasta", shell=True)
+        subprocess.call("sh " + TOOL_DIR + "/scripts/stx_subtype_fa.sh " + TOOL_DIR + " stx.fasta", shell=True)
         subprocess.call("echo 'sseqid\tpident\tlength\tpositive' > shigatoxin_fct", shell=True)
         subprocess.call("cat shigatoxin_fc >> shigatoxin_fct", shell=True)
         shutil.move("shigatoxin_fct", args.stx)
@@ -144,21 +144,25 @@ def __main__():
         log.write(os.popen("cat " +  TOOL_DIR + "/data/ShigatoxinTyping_db.txt").read())
     if args.serotyping:        
         # SEROTYPER
-        subprocess.call("echo 'sseqid\tpident\tlength\tpositive' > mmseqs_OH_fc", shell=True)
+        subprocess.call("echo 'sseqid\tpident\tlength\tpositive' > serogroup_OH_fcd", shell=True)
+        if args.input2:
+            subprocess.call("sh " + TOOL_DIR + "/scripts/serotype.sh " + TOOL_DIR + " y " + args.input1 + " " + args.input2 + " " + args.contigs, shell=True)
+        else:
+            subprocess.call("sh " + TOOL_DIR + "/scripts/serotype.sh " + TOOL_DIR + " n " + args.input1 + " xxx " + args.contigs, shell=True)
         # SEROTYPER O
-        subprocess.call("mmseqs easy-search --search-type 3 --format-output target,pident,alnlen,tlen " + args.contigs + " " + TOOL_DIR + "/data/O_typeDB mmseqs_O /tmp", shell=True)
-        subprocess.call("awk -F '\t' '($3>800 && $4>800) { print $1 FS $2 FS $3 FS $4 }' mmseqs_O | sort -nrk 2 -nrk 3 > mmseqs_O_fc", shell=True)
-        sero_typing_o = openFileAsTable("mmseqs_O_fc")
-        subprocess.call("cat mmseqs_O_fc >> mmseqs_OH_fc", shell=True)
-        shutil.move("mmseqs_O_fc", args.antigen_O)
+        subprocess.call("awk -F '\t' '$4>800 { print $2 FS $3 FS $4 FS $16 }' serogroup_O | sort -nrk 2 -nrk 3 > serogroup_O_fc", shell=True)
+        subprocess.call("awk -F , '!seen[$0]++' serogroup_O_fc > serogroup_O_fcd", shell=True)
+        sero_typing_o = openFileAsTable("serogroup_O_fcd")
+        subprocess.call("cat serogroup_O_fcd >> serogroup_OH_fcd", shell=True)
+        shutil.move("serogroup_O_fcd", args.antigen_O)
         # SEROTYPER H
-        subprocess.call("mmseqs easy-search --search-type 3 --format-output target,pident,alnlen,tlen " + args.contigs + " " + TOOL_DIR + "/data/H_typeDB mmseqs_H /tmp", shell=True)
-        subprocess.call("awk -F '\t' '($3>800 && $4>800) { print $1 FS $2 FS $3 FS $4 }' mmseqs_H | sort -nrk 2 -nrk 3 > mmseqs_H_fc", shell=True)
-        sero_typing_h = openFileAsTable("mmseqs_H_fc")
-        subprocess.call("cat mmseqs_H_fc >> mmseqs_OH_fc", shell=True)
-        shutil.move("mmseqs_H_fc", args.antigen_H)
+        subprocess.call("awk -F '\t' '$4>800 { print $2 FS $3 FS $4 FS $16 }' serogroup_H | sort -nrk 2 -nrk 3 > serogroup_H_fc", shell=True)
+        subprocess.call("awk -F , '!seen[$0]++' serogroup_H_fc > serogroup_H_fcd", shell=True)
+        sero_typing_h = openFileAsTable("serogroup_H_fcd")
+        subprocess.call("cat serogroup_H_fcd >> serogroup_OH_fcd", shell=True)
+        shutil.move("serogroup_H_fcd", args.antigen_H)
         if os.stat(args.antigen_O).st_size == 0 and os.stat(args.antigen_H).st_size == 0:
-            subprocess.call("echo '-\t-\t-\t-' >> mmseqs_OH_fc", shell=True)
+            subprocess.call("echo '-\t-\t-\t-' >> serogroup_OH_fcd", shell=True)
         log.write("\n\nSero Typer\n==============\n")
         log.write(os.popen("cat " +  TOOL_DIR + "/data/SeroTyping_db.txt").read())
     if args.amrtyping:
@@ -254,7 +258,7 @@ def __main__():
             report.write("<p>FASTQC result: <a href='%s/datasets/%s/display/?preview=True'>Webpage</a></p>\n" % (BASE_URL, args.html1_id))
         if args.serotyping:
             report.write("<br/><hr/><h3>Serotyping</h3>\n")
-            insertFileAsTable("mmseqs_OH_fc", report, True)
+            insertFileAsTable("serogroup_OH_fcd", report, True)
         report.write("<br/><hr/><h3>Multi Locus Sequence Typing</h3>\n")
         if len(sequence_typing) > 1:
             insertTable(sequence_typing, report, True)
