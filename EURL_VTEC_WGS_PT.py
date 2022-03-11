@@ -78,7 +78,7 @@ def __main__():
 
     log = open(args.logfile, 'w')
     log.write("EURL VTEC WGS PT v3.2\n\nTool versions\n=============\n")
-    os.system("ln -s " + os.popen("$(dirname $(readlink -e $(which trimmomatic)))").read().strip() + "/trimmomatic.jar trimmomatic.jar")
+    os.system("ln -s $(readlink -e $(which trimmomatic)).jar trimmomatic.jar")
     # FASTQC
     subprocess.call("python " + TOOL_DIR + "/scripts/rgFastQC.py -i " + args.input1 + " -d " + args.html1_path + " -o " + args.html1 + " -t " + args.text1 + " -f " + args.input1_ext + " -j " + args.input1_name + " -e " + "fastqc", shell=True)
     log.write(os.popen("fastqc -v").read())
