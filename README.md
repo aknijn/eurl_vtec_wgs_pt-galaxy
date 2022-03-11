@@ -6,7 +6,6 @@
     Assembly (SPAdes, DOI:10.1089/cmb.2012.0021; SKESA, DOI:10.1186/s13059-018-1540-z)
     Virulotyping (patho_typing tool from the INNUENDO Project)
     Multi Locus Sequence Typing (MLST 7 loci, https://github.com/tseemann/mlst/)
-    Serotyping (MMseqs2, DOI:10.1038/s41467-018-04964-5)
     Shigatoxintyping (blastn, DOI:10.1186/1471-2105-10-421, of a consensus sequence against the shiga toxin subtype database from the Statens Serum Institut SSI and Technical University of Denmark DTU, DOI:10.1128/JCM.00008-15)
     AMR typing (AMRFinderPlus, DOI:10.1128/aac.00483-19)
 
