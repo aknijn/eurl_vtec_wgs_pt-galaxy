@@ -7,6 +7,7 @@ fastafile="$5";
 ln -s $fastqfile1 fastqfile1;
 ln -s $fastqfile2 fastqfile2;
 # FILTER + ASSEMBLE + BLAST FASTQ
+chmod u+x $tooldir/scripts/duk
 if [ $paired = "y" ]
 then
   $tooldir/scripts/duk -m filteredO1.fq -k 23 $tooldir/data/O_type.fsa $fastqfile1;

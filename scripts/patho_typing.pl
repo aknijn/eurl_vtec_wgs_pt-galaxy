@@ -21,6 +21,8 @@ sub runPathoTyping {
     my $scriptdir = dirname($abs_path);
     my $rematchdir = "$scriptdir/ReMatCh";
     my $newpath = "PATH=$ENV{PATH}:$rematchdir";
+	my $mode = 0744;
+	chmod $mode, "$scriptdir/ReMatCh/rematch.py";
     `$newpath; $python`;
      return 0;
 }
