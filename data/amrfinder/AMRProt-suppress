@@ -1,17 +1,17 @@
-#taxgroup	protein_gi
-Escherichia	151858
-Escherichia	151859
-Escherichia	1061418
-Escherichia	2879920
-Escherichia	2879921
-Escherichia	85675040
-Escherichia	85676145
-Escherichia	85676370
-Escherichia	85676543
-Klebsiella	2879921
-Klebsiella	20152201
-Klebsiella	150954280
-Salmonella	85676145
-Staphylococcus	150728
-Staphylococcus	155345
-Vibrio_cholerae	146314413
+#taxgroup	protein_accession	protein_gi
+Escherichia	AAA21095.1	151858
+Escherichia	AAA21096.1	151859
+Escherichia	AAB09628.1	1061418
+Escherichia	BAA24823.1	2879920
+Escherichia	BAA24824.1	2879921
+Escherichia	BAA15331.2	85675040
+Escherichia	BAE77395.1	85676145
+Escherichia	BAE77620.1	85676370
+Escherichia	BAE77793.1	85676543
+Klebsiella	BAA24824.1	2879921
+Klebsiella	BAB89353.1	20152201
+Klebsiella	ABR76310.1	150954280
+Salmonella	BAE77395.1	85676145
+Staphylococcus_pseudintermedius	AAA25637.1	150728
+Staphylococcus_pseudintermedius	AAA27588.1	155345
+Vibrio_cholerae	ABQ18953.1	146314413
