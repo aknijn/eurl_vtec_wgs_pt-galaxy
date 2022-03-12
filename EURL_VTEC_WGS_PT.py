@@ -167,11 +167,12 @@ def __main__():
         log.write(os.popen("cat " +  TOOL_DIR + "/data/SeroTyping_db.txt").read())
     if args.amrtyping:
         # AMRGENES
-        subprocess.call("amrfinder --threads 4 --database " + TOOL_DIR + "/data/amrfinder -n " + args.contigs + " -O Escherichia -o " + args.amrgenes, shell=True)
-        log.write("\n\nAMR Typer\n==============\nAMRFinderPlus ")
-        log.write(os.popen("amrfinder --version").read())
+        # subprocess.call("amrfinder --threads 4 --database " + TOOL_DIR + "/data/amrfinder -n " + args.contigs + " -O Escherichia -o " + args.amrgenes, shell=True)
+        subprocess.call("abricate --db resfinder input.fasta > " + args.amrgenes, shell=True)
+        log.write("\n\nAMR Typer\n==============\nabricate ")
+        log.write(os.popen("abricate --version").read())
         log.write("\ndatabase version: ")
-        log.write(os.popen("cat " + TOOL_DIR + "/data/amrfinder/version.txt").read())
+        log.write(os.popen("abricate --list | grep resfinder").read())
     # REPORT
     try:
         report = open(args.output, 'w')

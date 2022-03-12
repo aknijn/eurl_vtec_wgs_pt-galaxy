@@ -16,7 +16,7 @@
         <requirement type="package" version="5.0.2">quast</requirement>
         <requirement type="package" version="3.8">muscle</requirement>
         <requirement type="package" version="2.19">mlst</requirement>
-        <requirement type="package" version="3.10">ncbi-amrfinderplus</requirement>
+		<requirement type="package" version="1.0.1">abricate</requirement>
         <requirement type="package" version="2020.2">tbb</requirement>
     </requirements>
     <!-- basic error handling -->
@@ -160,7 +160,7 @@ This tool performs various typing tools:
 
 - Shigatoxintyping (blastn of a consensus sequence against the shiga toxin subtype database from the Statens Serum Institut SSI and Technical University of Denmark DTU)
 
-- AMR typing (AMRFinderPlus)
+- AMR typing (Abricate with ResFinder database)
 
 Istituto Superiore di Sanità
 
@@ -189,9 +189,15 @@ from “Programa Operacional Regional Lisboa 2020” and by national funds from 
             title = {{mlst}},
             url = {https://github.com/tseemann/mlst/}
         }</citation>
+      <citation type="bibtex">@ARTICLE{seemann_t,
+            author = {Seemann, T},
+            keywords = {bioinformatics, ngs},
+            title = {{abricate}},
+            url = {https://github.com/tseemann/abricate/}
+        }</citation>
       <citation type="doi">10.1089/cmb.2012.0021</citation>
       <citation type="doi">10.1186/s13059-018-1540-z</citation>
-      <citation type="doi">10.1128/AAC.00483-19</citation>
+      <citation type="doi">d10.1093/jac/dks261</citation>
       <citation type="doi">10.1128/JCM.00008-15</citation>
       <citation type="bibtex">@ARTICLE{andrews_s,
             author = {Li, M, Copeland, A, and Han, J},
