@@ -168,7 +168,7 @@ def __main__():
     if args.amrtyping:
         # AMRGENES
         # subprocess.call("amrfinder --threads 4 --database " + TOOL_DIR + "/data/amrfinder -n " + args.contigs + " -O Escherichia -o " + args.amrgenes, shell=True)
-        subprocess.call("abricate --db resfinder input.fasta > " + args.amrgenes, shell=True)
+        subprocess.call("abricate --db resfinder " + args.contigs + " > " + args.amrgenes, shell=True)
         log.write("\n\nAMR Typer\n==============\nabricate ")
         log.write(os.popen("abricate --version").read())
         log.write("\ndatabase version: ")
