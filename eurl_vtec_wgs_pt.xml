@@ -26,7 +26,8 @@
     <command>
 <![CDATA[
       python
-      $__tool_directory__/EURL_VTEC_WGS_PT.py --log $logfile --output $report_out --contigs $contigs --quast $quast --mlstsevenloci $mlstsevenloci
+      $__tool_directory__/EURL_VTEC_WGS_PT.py --base_url $__app__.config.galaxy_infrastructure_url --log $logfile --output $report_out
+	  --contigs $contigs --quast $quast --mlstsevenloci $mlstsevenloci
       #if str( $library.type ) == "single":
           -1 ${library.input_1} --input1_ext ${library.input_1.ext} --input1_name '${library.input_1.name}' 
           --html1 $html_file_1 --html1_id $__app__.security.encode_id($html_file_1.dataset.id) --html1_path ${html_file_1.files_path} 

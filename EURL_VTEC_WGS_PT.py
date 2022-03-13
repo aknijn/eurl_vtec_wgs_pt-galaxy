@@ -17,7 +17,6 @@ import HTML
 import datetime
 import fileinput
 
-BASE_URL = 'https://aries.iss.it'
 TOOL_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def insertFile(filename, report):
@@ -64,6 +63,7 @@ def __main__():
     parser.add_argument('--text2', dest='text2', help='text FASTQC file')
     parser.add_argument('--contigs', dest='contigs', help='Assembly contigs')
     parser.add_argument('--quast', dest='quast', help='Quast report')
+    parser.add_argument('--base_url', dest='base_url', help='base_url')
     parser.add_argument('--log', dest='logfile', help='log file')
     parser.add_argument('--virulotyper', dest='virulotyper', help='Virulotyping Mapping reads')
     parser.add_argument('--virulotyper_id', dest='virulotyper_id', help='Virulotyping Mapping reads id')
@@ -76,8 +76,9 @@ def __main__():
     parser.add_argument('--output', dest='output', help='output report html file')
     args = parser.parse_args()
 
+    BASE_URL = args.base_url
     log = open(args.logfile, 'w')
-    log.write("EURL VTEC WGS PT v3.2\n\nTool versions\n=============\n")
+    log.write("EURL VTEC WGS PT v4.0\n\nTool versions\n=============\n")
     os.system("ln -s $(readlink -e $(which trimmomatic)).jar trimmomatic.jar")
     # FASTQC
     subprocess.call("python " + TOOL_DIR + "/scripts/rgFastQC.py -i " + args.input1 + " -d " + args.html1_path + " -o " + args.html1 + " -t " + args.text1 + " -f " + args.input1_ext + " -j " + args.input1_name + " -e " + "fastqc", shell=True)
