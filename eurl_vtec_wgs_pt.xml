@@ -1,5 +1,5 @@
 <tool id="eurlvtecwgspt" name="EURL VTEC WGS PT" version="4.0">
-    <description>performs various e coli typing tools</description>
+    <description>workflow that performs various E. coli typing tools</description>
     <requirements>
         <requirement type="package" version="3.7">python</requirement>
         <requirement type="package" version="5.26">perl</requirement>
