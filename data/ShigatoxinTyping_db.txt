@@ -1,2 +1,2 @@
 Statens Serum Institut & Technical University of Denmark
-Shigatoxin subtype database: v20180910
+Shigatoxin subtype database: v20221018
