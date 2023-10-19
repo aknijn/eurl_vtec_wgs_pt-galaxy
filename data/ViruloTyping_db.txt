@@ -1,2 +1,2 @@
 Statens Serum Institut & Technical University of Denmark
-Virulotype database: v20200722 (with additions v20201121)
+Virulotype database: v20230714 (with additions v20231019)
