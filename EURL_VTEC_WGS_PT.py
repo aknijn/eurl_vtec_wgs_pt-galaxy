@@ -121,7 +121,7 @@ def __main__():
         log.write("parameters: minGeneCoverage=90, minGeneIdentity=90, minGeneDepth=15\n\n")
         log.write(os.popen("cat " +  TOOL_DIR + "/data/ViruloTyping_db.txt").read())
     # SEQUENCETYPER
-    subprocess.call("mlst --legacy --scheme ecoli_4 " + args.contigs + " | cut -f3,4,5,6,7,8,9,10 > " + args.mlstsevenloci, shell=True)
+    subprocess.call("mlst --legacy --scheme ecoli_achtman_4 " + args.contigs + " | cut -f3,4,5,6,7,8,9,10 > " + args.mlstsevenloci, shell=True)
     sequence_typing = openFileAsTable(args.mlstsevenloci)
     log.write("\n\nSequence Typer\n==============\n")
     log.write(os.popen("mlst -v").read())
