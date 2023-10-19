@@ -1,3 +1,3 @@
 Enterobase
-Allele database: v20231019
-Sequence database: v20231019
+Allele database: v20221028
+Sequence database: v20221028
