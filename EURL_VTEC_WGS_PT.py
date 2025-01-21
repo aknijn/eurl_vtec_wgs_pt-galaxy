@@ -203,7 +203,10 @@ def __main__():
             report.write("ST%s" % sequence_typing[1][0])
         report.write("</p>\n")
         if args.virulotyping:
-            subprocess.call("sort " + args.virulotyper  + " | awk '/eae_|stx1._|stx2._|ehxa_/ && $2>50 && !seen[substr($1, 1, index($1, \"_\")-2)]++ { printf(\"%s%s\",sep,substr($1, 1, index($1, \"_\")-1));sep=\", \" }END{print \"\"}' > virulotyper_rep", shell=True)
+            #subprocess.call("sort " + args.virulotyper  + " | awk '/eae_|stx1._|stx2._|ehxa_/ && $2>50 && !seen[substr($1, 1, index($1, \"_\")-2)]++ { printf(\"%s%s\",sep,substr($1, 1, index($1, \"_\")-1));sep=\", \" }END{print \"\"}' > virulotyper_rep", shell=True)
+            subprocess.call("sort " + args.virulotyper  + " | awk '/eae_|stx1._|stx2._|ehxa_/ && $2>50 && !seen[substr($1, 1, 4]++ { printf(\"%s%s\",sep,substr($1, 1, 4);sep=\", \" }END{print \"\"}' > virulotyper_rep", shell=True)
+            for line in fileinput.input("virulotyper_rep", inplace=True):
+                print(line.replace("_", ""),)
             # for line in fileinput.input("virulotyper_rep", inplace=True):
                 # print(line.replace("1a", "1"),)
             # for line in fileinput.input("virulotyper_rep", inplace=True):
